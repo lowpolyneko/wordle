@@ -101,18 +101,49 @@ void parseText(wordCountStruct *allWords, char *guessesFileName,
     // Read each word from file and print it.  You could do other things along
     // the way, like counting how many words there are.
     while (fscanf(inFilePtr, "%s", inputString) != EOF) {
-      strncpy(allWords[index++].word, inputString, 80);
+      strncpy(allWords[index++].word, inputString,
+              80); // copies inputstring to allwords[i].word, since allword is a
+                   // function call of malloc, which is a void pointer, and it
+                   // can be accessed similarly to an array.
     }
 
     // Close the file
     fclose(inFilePtr);
 
-    if (strcmp(fileName, answersFileName) == 0) {
+    if (strcmp(fileName, answersFileName) ==
+        0) { // if the files themselves are equal
       return;
     }
 
     strncpy(fileName, answersFileName, 80);
   }
+}
+
+int calculateScore(char *guessWord, char *answerWord) {
+  char *guessLetter;
+  char *answerLetter;
+  int score;
+  score = 0;
+
+  /* first pass, add exact matches */
+  guessLetter = guessWord;
+  answerLetter = answerWord;
+  while (*guessLetter != '\0') {
+    while ((answerLetter = strchr(answerLetter, *guessLetter)) != NULL) {
+      /*
+      if (guessLetter - guessWord == answerLetter - answerWord) {
+        score += 3;
+        continue;
+      }
+      */
+
+      score++;
+    }
+
+    guessLetter++;
+  }
+
+  return score;
 }
 
 // -----------------------------------------------------------------------------------------
@@ -152,9 +183,19 @@ int main() {
 
   // runs from option 1, 2
   allWordsLength = textCounter(guessesFileName) + textCounter(answersFileName);
-  allWords = malloc(allWordsLength * sizeof(wordCountStruct));
+  allWords =
+      malloc(allWordsLength *
+             sizeof(wordCountStruct)); // we allocate the right number of space
+                                       // because we count the number of text in
+                                       // each file by opening it.
 
-  parseText(allWords, guessesFileName, answersFileName);
+  wordCountStruct *answersPtr = allWords + textCounter(answersFileName);
+
+  parseText(allWords, guessesFileName, answersFileName); //
+
+  /* test first word, second word */
+  printf("First word: %s, Second word: %s, Score: %d\n", allWords->word,
+         answersPtr->word, calculateScore(allWords->word, answersPtr->word));
 
   for (int i = 0; i < allWordsLength; i++)
     printf("%s\n", allWords[i].word);
