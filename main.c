@@ -119,32 +119,92 @@ void parseText(wordCountStruct *allWords, char *guessesFileName,
   }
 }
 
-int calculateScore(char *guessWord, char *answerWord) {
-  char *guessLetter;
-  char *answerLetter;
-  int score;
-  score = 0;
+// int calculateScore(char *guessWord, char *answerWord) {
+//   int i, j, score = 0;
 
-  /* first pass, add exact matches */
-  guessLetter = guessWord;
-  answerLetter = answerWord;
-  while (*guessLetter != '\0') {
-    while ((answerLetter = strchr(answerLetter, *guessLetter)) != NULL) {
-      /*
-      if (guessLetter - guessWord == answerLetter - answerWord) {
-        score += 3;
-        continue;
-      }
-      */
+//   /* first pass, add exact matches */
+//   for (i = 0; i < 5; ++i) {
+//     if (guessWord[i] == answerWord[i]) {
+//       score += 3;
+//       guessWord[i] = ' ';
+//       answerWord[i] = ' ';
+//     }
+//   }
 
-      score++;
-    }
+//   /* second pass, add match in diff position*/
+//   for (i = 0; i < 5; ++i) {
+//     for (j = 0; j < 5; ++j) {
+//       if (answerWord[i] == '\0') {
+//         continue;
+//       }
+//       if (answerWord[i] == guessWord[j]) {
+//         score++;
+//       }
+//     }
+//   }
 
-    guessLetter++;
-  }
+//   return score;
+// }
+
+// void scoringFunction(wordCountStruct *allWords, int allWordsLength,
+//                      int answersIndex) {
+//   int i, j;
+//   int totalScore = 0;
+
+//   for (i = 0; i < allWordsLength; ++i) {
+//     for (j = answersIndex + 1; j < allWordsLength; ++j) {
+//       totalScore += calculateScore(allWords[i].word, allWords[j].word);
+//     }
+
+//     allWords[i].score = totalScore;
+//     totalScore = 0;
+//   }
+// }
+
+
+
+
+int calculateScore2(char* guessWord, char* answerWord) {
+  int i, j;
+  int score = 0;
+
+              for(int k = 0; k < 5; j++){
+                  if (guessWord[k] == answerWord[k]) {
+                      score += 3;
+                      guessWord[i] = '-';
+                      answerWord[i] = '-';
+                  }
+        
+                  for(int l = 0; l < 5; l++){
+                      if(guessWord[l] == answerWord[k]){
+                        score+=1;
+                        guessWord[l] = '-';
+                        answerWord[k] = '/';
+                      }
+                  }
+            
+              }
 
   return score;
 }
+
+void scoringFunction2(wordCountStruct *allWords, int allWordsLength,
+                     int answersLength) {
+  int i, j;
+  int totalScore = 0;
+  char* guessWord = allWords[0].word;
+  char* answerWord = allWords[answersLength].word;
+
+  for (i = 0; i < allWordsLength; ++i) {
+    for (j = 0; j < answersLength; ++j) {
+      totalScore += calculateScore2(guessWord, answerWord);
+    }
+
+    allWords[i].score = totalScore;
+    totalScore = 0;
+  }
+}
+
 
 // -----------------------------------------------------------------------------------------
 int main() {
@@ -183,22 +243,23 @@ int main() {
 
   // runs from option 1, 2
   allWordsLength = textCounter(guessesFileName) + textCounter(answersFileName);
+  int answersLength = textCounter(answersFileName);
+  
   allWords =
       malloc(allWordsLength *
              sizeof(wordCountStruct)); // we allocate the right number of space
                                        // because we count the number of text in
                                        // each file by opening it.
 
-  wordCountStruct *answersPtr = allWords + textCounter(answersFileName);
-
   parseText(allWords, guessesFileName, answersFileName); //
+  
 
   /* test first word, second word */
-  printf("First word: %s, Second word: %s, Score: %d\n", allWords->word,
-         answersPtr->word, calculateScore(allWords->word, answersPtr->word));
+  scoringFunction2(allWords, allWordsLength, answersLength);
+  
 
   for (int i = 0; i < allWordsLength; i++)
-    printf("%s\n", allWords[i].word);
+    printf("Word: %s, Score: %d\n", allWords[i].word, allWords[i].score);
 
   printf("Done\n");
   return 0;
