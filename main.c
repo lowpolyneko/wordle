@@ -179,7 +179,9 @@ int calculateScore2(char *guessWord, char *answerWord) {
             guessBuffer[i] = '-';
             answerBuffer[i] = '_';
         }
+    }
 
+    for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
             if(guessBuffer[i] == answerBuffer[j]) {
                 score+=1;
