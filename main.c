@@ -1,5 +1,8 @@
-//  bestWordle.c
-//  Author:
+//  Program 3: Best Wordle Words
+//
+//  Course: CS 211, Fall 2022
+//  System: Replit with clang
+//  Author: Sam Effendy, Ethan Wong
 //
 //  Links to wordle dictionary words at:
 //    https://www.reddit.com/r/wordle/comments/s4tcw8/a_note_on_wordles_word_list/
@@ -9,6 +12,8 @@
 #include <stdlib.h> // for exit( -1)
 #include <string.h>
 
+
+/* structs */
 struct word_struct {
     char word[81];
     int score;
@@ -22,7 +27,8 @@ typedef struct word_struct wordCountStruct;
 // comparison.  First the scores are compared.  If they are the same, then the
 // words themselves are also compared, so that the results are in descending
 // order by score, and within score they are in alphabetic order.
-int compareFunction(const void *a, const void *b) {
+int compareFunction(const void *a, const void *b)
+{
     // Before using parameters we have cast them into the actual type they are in
     // our program and then extract the numerical value used in comparison
     int firstScore = ((wordCountStruct *)a)->score;
@@ -50,18 +56,18 @@ int compareFunction(const void *a, const void *b) {
 // ... uncomment out the line below once you have it in a meaningful context in
 // your code. qsort( theArray, numElementsInArray, sizeof( your struct),
 // compareFunction);
-
-void sortArrays(wordCountStruct *allWords, size_t length) {
+void sortArrays(wordCountStruct *allWords, size_t length)
+{
     // in case segfault, set word size to 6 (since wordle has 5 words)
     qsort(allWords, length, sizeof(wordCountStruct), compareFunction);
-    for (int i = length - 1; i > 0; i++) {
-        // printf("%d", )
-    }
-    // Sort the allWords array in descending order by score, and within score they
-    // should also be sorted into ascending order alphabetically.
 }
 
-int textCounter(char *fileName) {
+/*
+ * Given a file, returns the number of lines in the file.
+ */
+int textCounter(char *fileName)
+{
+    // Sample code to read in from a file
     FILE *inFilePtr = fopen(fileName, "r"); // Connect logical name to filename
     char inputString[81];
     int textCounter = 0;
@@ -74,15 +80,20 @@ int textCounter(char *fileName) {
 
     // Read each word from file and print it.  You could do other things along the
     // way, like counting how many words there are.
-    while (fscanf(inFilePtr, "%s", inputString) != EOF) {
+    while (fscanf(inFilePtr, "%s", inputString) != EOF)
         textCounter++;
-    }
 
     return textCounter;
 }
 
-void parseText(wordCountStruct *allWords, char *guessesFileName,
-        char *answersFileName) {
+/*
+ * Given an array of all words (assumed adequate space), read the guesses and answers file
+ * and dump the words into allWords. Guesses go first.
+ */
+void parseText(wordCountStruct *allWords,
+               char *guessesFileName,
+               char *answersFileName)
+{
     // Sample code to read in from a file
     char fileName[81];
     char inputString[81];
@@ -90,89 +101,50 @@ void parseText(wordCountStruct *allWords, char *guessesFileName,
     int index = 0;
 
     strncpy(fileName, guessesFileName, 80);
-    for (;;) {
-        inFilePtr = fopen(fileName, "r"); // Connect logical name to filename
+read_file:
+    inFilePtr = fopen(fileName, "r"); // Connect logical name to filename
 
-        // Sanity check: ensure file open worked correctly
-        if (inFilePtr == NULL) {
-            exit(-1); // must include stdlib.h
-        }
-
-        // Read each word from file and print it.  You could do other things along
-        // the way, like counting how many words there are.
-        while (fscanf(inFilePtr, "%s", inputString) != EOF) {
-            strncpy(allWords[index++].word, inputString,
-                    80); // copies inputstring to allwords[i].word, since allword is a
-                         // function call of malloc, which is a void pointer, and it
-                         // can be accessed similarly to an array.
-        }
-
-        // Close the file
-        fclose(inFilePtr);
-
-        if (strcmp(fileName, answersFileName) ==
-                0) { // if the files themselves are equal
-            return;
-        }
-
-        strncpy(fileName, answersFileName, 80);
+    // Sanity check: ensure file open worked correctly
+    if (inFilePtr == NULL) {
+        exit(-1); // must include stdlib.h
     }
+
+    // Read each word from file and print it.  You could do other things along
+    // the way, like counting how many words there are.
+    while (fscanf(inFilePtr, "%s", inputString) != EOF) {
+        strncpy(allWords[index++].word, inputString,
+                80); // copies inputstring to allwords[i].word, since allword is a
+                     // function call of malloc, which is a void pointer, and it
+                     // can be accessed similarly to an array.
+    }
+
+    // Close the file
+    fclose(inFilePtr);
+
+    if (strcmp(fileName, answersFileName) ==
+            0) { // if the files themselves are equal
+        return;
+    }
+
+    strncpy(fileName, answersFileName, 80);
+    goto read_file;
 }
 
-// int calculateScore(char *guessWord, char *answerWord) {
-//   int i, j, score = 0;
-
-//   /* first pass, add exact matches */
-//   for (i = 0; i < 5; ++i) {
-//     if (guessWord[i] == answerWord[i]) {
-//       score += 3;
-//       guessWord[i] = ' ';
-//       answerWord[i] = ' ';
-//     }
-//   }
-
-//   /* second pass, add match in diff position*/
-//   for (i = 0; i < 5; ++i) {
-//     for (j = 0; j < 5; ++j) {
-//       if (answerWord[i] == '\0') {
-//         continue;
-//       }
-//       if (answerWord[i] == guessWord[j]) {
-//         score++;
-//       }
-//     }
-//   }
-
-//   return score;
-// }
-
-// void scoringFunction(wordCountStruct *allWords, int allWordsLength,
-//                      int answersIndex) {
-//   int i, j;
-//   int totalScore = 0;
-
-//   for (i = 0; i < allWordsLength; ++i) {
-//     for (j = answersIndex + 1; j < allWordsLength; ++j) {
-//       totalScore += calculateScore(allWords[i].word, allWords[j].word);
-//     }
-
-//     allWords[i].score = totalScore;
-//     totalScore = 0;
-//   }
-// }
-
-
-
-
-int calculateScore2(char *guessWord, char *answerWord) {
+/*
+ * given a guess and an answer word, calculate the score of the guess based on the answer
+ */
+int calculateScore2(char *guessWord, char *answerWord)
+{
     int i, j;
     int score = 0;
     char guessBuffer[6];
     char answerBuffer[6];
 
+    /* do scoring in a buffer */
     strncpy(guessBuffer, guessWord, 5);
     strncpy(answerBuffer, answerWord, 5);
 
+    /* first pass, add exact matches and replace characters in buffer */
     for(i = 0; i < 5; i++) {
         if (guessBuffer[i] == answerBuffer[i]) {
             score += 3;
@@ -181,6 +153,7 @@ int calculateScore2(char *guessWord, char *answerWord) {
         }
     }
 
+    /* second pass, check each guess character with every answer character and score */
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
             if(guessBuffer[i] == answerBuffer[j]) {
@@ -194,16 +167,24 @@ int calculateScore2(char *guessWord, char *answerWord) {
     return score;
 }
 
-void scoringFunction2(wordCountStruct *allWords, int allWordsLength,
-        int guessesLength) {
+/*
+ * given the list of all words, the length of the array, and the beginning of answers,
+ * calculate the total score for all words in allWords
+ */
+void scoringFunction2(wordCountStruct *allWords,
+                      int allWordsLength,
+                      int guessesLength)
+{
     int i, j;
     int totalScore = 0;
     char *guessWord;
     char *answerWord;
 
+    /* for all words */
     for (i = 0; i < allWordsLength; ++i) {
         guessWord = allWords[i].word;
 
+        /* loop through all answers */
         for (j = guessesLength; j < allWordsLength; ++j) {
             answerWord = allWords[j].word;
             totalScore += calculateScore2(guessWord, answerWord);
@@ -216,7 +197,8 @@ void scoringFunction2(wordCountStruct *allWords, int allWordsLength,
 
 
 // -----------------------------------------------------------------------------------------
-int main() {
+int main()
+{
     char answersFileName[81]; // Stores the answers file name
     char guessesFileName[81]; // Stores the guesses file name
                               // Set default file names
