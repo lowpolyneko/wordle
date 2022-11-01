@@ -19,4 +19,6 @@ leant 34
 EOF
 )
 
+echo "3 answersTiny.txt guessesTiny.txt 1" | ./main
+
 diff -w <(echo "3 answersTiny.txt guessesTiny.txt 1" | ./main) <(printf "%s" "$OUTPUT")
