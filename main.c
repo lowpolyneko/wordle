@@ -19,6 +19,7 @@ struct word_struct {
       int score;
 };
 
+//use typedef so we could use a different name to refer to word_struct
 typedef struct word_struct wordCountStruct;
 
 //----------------------------------------------------------------------------------------
@@ -223,42 +224,42 @@ void scoringFunction(wordCountStruct *allWords,
 }
 
 void scoringFunction2(wordCountStruct *allWords, wordCountStruct *firstWords, int firstWordsLength, int allWordsLength, int guessesLength) {
-    //for second best words, after storing words with most points, we loop through each element in firstWords and compare them to answers, removing each instance of every letter in the same position.
-    // make a copy of the answer words and go through and blank out letters 
-    // that would have already been covered by the first guess word.  
-    // After this has been done you can do the same scoring that you did before, this time using this modified copy of all the answer words.  
-    int i, j, k;
-    int totalScore = 0;
-    char answerWordCopy[6];
-    wordCountStruct *firstWord;
-
-    wordCountStruct *allWordsBuffer = malloc(allWordsLength * sizeof(wordCountStruct));
+      //for second best words, after storing words with most points, we loop through each element in firstWords and compare them to answers, removing each instance of every letter in the same position.
+      // make a copy of the answer words and go through and blank out letters 
+      // that would have already been covered by the first guess word.  
+      // After this has been done you can do the same scoring that you did before, this time using this modified copy of all the answer       words.  
+      int i, j, k;
+      int totalScore = 0;
+      char answerWordCopy[6];
+      wordCountStruct *firstWord;
   
-    for(i = 0; i < firstWordsLength; ++i) {
-        firstWord = firstWords + i;
-        memcpy(allWordsBuffer, allWords, allWordsLength * sizeof(wordCountStruct));
-
-        scoringFunction(allWordsBuffer, allWordsLength, guessesLength, firstWord);
-      
-        printf("answerWordsCopy after letters from %s removed:\n", firstWord->word);
-        for (int i = guessesLength; i < allWordsLength; i++) {
-            strncpy(answerWordCopy, allWordsBuffer[i].word, 6);
-            removeCharacters(firstWord->word, answerWordCopy);
-            printf("%d. %s\n", i - guessesLength, answerWordCopy);
-        }
+      wordCountStruct *allWordsBuffer = malloc(allWordsLength * sizeof(wordCountStruct));
     
-        printf("Words and scores:\n");
-        sortArrays(allWordsBuffer, allWordsLength);
-        for (int i = 0; i < allWordsLength; i++)
-            printf("%d %s\n", allWordsBuffer[i].score, allWordsBuffer[i].word);
-    }
+      for(i = 0; i < firstWordsLength; ++i) {
+          firstWord = firstWords + i;
+          memcpy(allWordsBuffer, allWords, allWordsLength * sizeof(wordCountStruct));
+  
+          scoringFunction(allWordsBuffer, allWordsLength, guessesLength, firstWord);
+      
+          printf("%s %d\n", firstWord->word, firstWord->score);
+        
+          sortArrays(allWordsBuffer, allWordsLength);
+          int topScore = allWordsBuffer->score;
+          for (int i = 0; i < allWordsLength; i++) {
+              if (allWordsBuffer[i].score != topScore)
+                  break;
+        
+              printf("   %s %d", allWordsBuffer[i].word, allWordsBuffer[i].score);
+          }
+          printf("\n");
+      }
 }
 
 // -----------------------------------------------------------------------------------------
 int main()
 {
-      char answersFileName[81]; // Stores the answers file name
-      char guessesFileName[81]; // Stores the guesses file name
+      char answersFileName[81] = "answersTiny.txt"; // Stores the answers file name
+      char guessesFileName[81] = "guessesTiny.txt"; // Stores the guesses file name
                                 // Set default file names
   
                                 // variables
@@ -277,7 +278,7 @@ int main()
           printf("  2. Display best first and best second words\n");
           printf("  3. Change answers and guesses filenames\n");
           printf("  4. Exit\n");
-          printf("Your choice:\n ");
+          printf("Your choice: ");
           scanf("%d", &menuOption);
   
           // Handle menu option 3 to exit the program
@@ -307,12 +308,10 @@ int main()
       /* test first word, second word */
       scoringFunction(allWords, allWordsLength, guessesLength, NULL);
       sortArrays(allWords, allWordsLength);
+
+      if (menuOption == 1)
+          printf("\nWords and scores for top first words:\n");
   
-      printf("All words in descending order by score:\n");
-      for (int i = 0; i < allWordsLength; i++)
-            printf("%d %s\n", allWords[i].score, allWords[i].word);
-  
-      printf("Top scoring words:\n");
       int topScore = allWords->score;
       int firstWordsLength = 0;
       for (int i = 0; i < allWordsLength; i++) {
@@ -320,7 +319,8 @@ int main()
                   break;
     
             firstWordsLength++;
-            printf("%s %d\n", allWords[i].word, allWords[i].score);
+            if (menuOption == 1)
+                printf("%s %d\n", allWords[i].word, allWords[i].score);
       }
   
       if (menuOption == 1) {
@@ -332,9 +332,10 @@ int main()
       for (int i = 0; i < firstWordsLength; i++)
             firstWords[i] = allWords[i];
   
-      printf("Words and scores for top first words and second words:\n");
+      printf("\nWords and scores for top first words and second words:\n");
       parseText(allWords, guessesFileName, answersFileName); // Reread allWords
       scoringFunction2(allWords, firstWords, firstWordsLength, allWordsLength, guessesLength);
+      printf("Done\n");
     
       free(allWords);
       free(firstWords);
